@@ -6,17 +6,12 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
 # Configuration
 BLUESKY_HANDLE = 'esportesnatv.bsky.social'
 BLUESKY_API_BASE = 'https://public.api.bsky.app'
-EMAIL_RECIPIENT = os.getenv('EMAIL_RECIPIENT')
-EMAIL_SENDER = os.getenv('EMAIL_SENDER')
-EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
-SMTP_SERVER = 'smtp.gmail.com'
-SMTP_PORT = 587
+
+# Load environment variables
+load_dotenv()
 
 def get_latest_post():
     """Fetch the latest post from the specified Bluesky account."""
@@ -56,15 +51,22 @@ def get_latest_post():
 
 def send_email(post_data):
     """Send an email with the latest post."""
-    if not all([EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECIPIENT]):
-        print("Email configuration is incomplete. Please check your .env file.")
+    # Get email configuration from environment
+    email_from = os.getenv('EMAIL_FROM')
+    email_to = os.getenv('EMAIL_TO')
+    email_password = os.getenv('EMAIL_PASSWORD')
+    smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+    smtp_port = int(os.getenv('SMTP_PORT', '587'))
+    
+    if not all([email_from, email_password, email_to]):
+        print("Email configuration is incomplete. Please check your configuration.")
         return False
     
     try:
         # Create message
         msg = MIMEMultipart()
-        msg['From'] = EMAIL_SENDER
-        msg['To'] = EMAIL_RECIPIENT
+        msg['From'] = email_from
+        msg['To'] = email_to
         msg['Subject'] = f"📰 Daily Update from {BLUESKY_HANDLE} - {datetime.now().strftime('%Y-%m-%d')}"
         
         # Format the email body
@@ -80,12 +82,12 @@ def send_email(post_data):
         msg.attach(MIMEText(body, 'html'))
         
         # Connect to SMTP server and send email
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
-            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            server.login(email_from, email_password)
             server.send_message(msg)
             
-        print(f"Email sent successfully to {EMAIL_RECIPIENT}")
+        print(f"Email sent successfully to {email_to}")
         return True
         
     except Exception as e:
