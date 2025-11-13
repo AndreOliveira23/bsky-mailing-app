@@ -29,14 +29,24 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Debug - List files
+      - name: Debug - List files and locate script
+        id: locate
         run: |
           echo "Current directory:"
           pwd
-          echo "Files in repo:"
+          echo ""
+          echo "Directory structure:"
           ls -la
-          echo "Python files:"
-          ls -la *.py || echo "No Python files found"
+          echo ""
+          echo "Finding bluesky_daily_post.py:"
+          SCRIPT_PATH=$(find . -name "bluesky_daily_post.py" -type f | head -n 1)
+          if [ -n "$SCRIPT_PATH" ]; then
+            echo "Found script at: $SCRIPT_PATH"
+            echo "script_path=$SCRIPT_PATH" >> $GITHUB_OUTPUT
+          else
+            echo "ERROR: Script not found!"
+            exit 1
+          fi
       
       - name: Run daily post script
         env:
@@ -45,7 +55,7 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: |
-          python bluesky_daily_post.py
+          python ${{ steps.locate.outputs.script_path }}
       
       - name: Notify on failure
         if: failure()
