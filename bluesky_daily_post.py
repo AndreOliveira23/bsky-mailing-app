@@ -63,26 +63,26 @@ def send_email(post_data):
         return False
     
         try:
-        # Create message
-        msg = MIMEMultipart()
-        msg['From'] = email_from
-        msg['To'] = email_to
-        msg['Subject'] = f"📰 Daily Update from {BLUESKY_HANDLE} - {datetime.now().strftime('%Y-%m-%d')}"
-        
-        # Format the post text for HTML (replace newlines with <br>)
-        formatted_text = post_data['text'].replace('\n', '<br>')
-        
-        # Format the email body
-        body = f"""
-        <h2>Latest Post from {post_data['author']}</h2>
-        <p><strong>Posted at:</strong> {post_data['created_at']}</p>
-        <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
-            {formatted_text}
-        </div>
-        <p><a href="{post_data['url']}">View on Bluesky</a></p>
-        """
-        
-        msg.attach(MIMEText(body, 'html'))
+            # Create message
+            msg = MIMEMultipart()
+            msg['From'] = email_from
+            msg['To'] = email_to
+            msg['Subject'] = f"📰 Daily Update from {BLUESKY_HANDLE} - {datetime.now().strftime('%Y-%m-%d')}"
+            
+            # Format the post text for HTML (replace newlines with <br>)
+            formatted_text = post_data['text'].replace('\n', '<br>')
+            
+            # Format the email body
+            body = f"""
+            <h2>Latest Post from {post_data['author']}</h2>
+            <p><strong>Posted at:</strong> {post_data['created_at']}</p>
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                {formatted_text}
+            </div>
+            <p><a href="{post_data['url']}">View on Bluesky</a></p>
+            """
+            
+            msg.attach(MIMEText(body, 'html'))
         
         # Connect to SMTP server and send email
         with smtplib.SMTP(smtp_server, smtp_port) as server:
