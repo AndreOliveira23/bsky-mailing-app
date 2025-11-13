@@ -12,7 +12,7 @@ Deploy your Bluesky emailer to run automatically every day using GitHub Actions 
 ## 📋 Prerequisites
 
 - GitHub account (free)
-- Your email credentials ready
+- Resend API key (see [EASY_EMAIL_SETUP.md](EASY_EMAIL_SETUP.md))
 
 ---
 
@@ -57,17 +57,18 @@ This is the most important step - it keeps your credentials secure!
 3. In left sidebar: **Secrets and variables** → **Actions**
 4. Click **"New repository secret"**
 
-Add each of these secrets one by one:
+Add these secrets:
 
-#### Required Secrets (5 total):
+| Secret Name | Required? | Example Value | Where to Get It |
+|-------------|-----------|---------------|-----------------|
+| `RESEND_API_KEY` | ✅ Yes | `re_xxxxx...` | [Resend Dashboard](https://resend.com/api-keys) |
+| `EMAIL_FROM` | ✅ Yes | `onboarding@resend.dev` | Use testing email or your domain |
+| `EMAIL_TO` | ✅ Yes | `recipient@example.com` | Where to send the emails |
 
-| Secret Name | Example Value | Where to Get It |
-|-------------|---------------|-----------------||
-| `EMAIL_FROM` | `your@gmail.com` | Your Gmail address |
-| `EMAIL_PASSWORD` | `abcd efgh ijkl mnop` | [Gmail App Password](#how-to-get-gmail-app-password) |
-| `EMAIL_TO` | `recipient@example.com` | Where to send the emails |
-| `SMTP_SERVER` | `smtp.gmail.com` | Gmail SMTP server |
-| `SMTP_PORT` | `587` | Gmail SMTP port |
+**Minimum secrets needed: 3**  
+**Setup guide:** [EASY_EMAIL_SETUP.md](EASY_EMAIL_SETUP.md)
+
+---
 
 **Note:** No Bluesky credentials needed! The script uses the public Bluesky API to read posts.
 
@@ -154,13 +155,12 @@ GitHub will email you if a workflow fails (check your GitHub notification settin
 
 ### Authentication Failed
 
-**Problem:** `Login failed` or `Invalid credentials`
+**Problem:** `401 Unauthorized` or `Invalid API Key`
 
 **Solutions:**
-- **Gmail:** Use an **App Password**, not your main password
-  - [See guide below](#how-to-get-gmail-app-password)
 - Double-check secret names match exactly (case-sensitive)
-- Ensure 2FA is enabled on your Gmail account
+- Verify your `RESEND_API_KEY` is correct and active in the Resend dashboard
+- Ensure `EMAIL_FROM` uses a verified sender/domain or `onboarding@resend.dev` for testing
 
 ### Email Not Sending
 
@@ -169,9 +169,8 @@ GitHub will email you if a workflow fails (check your GitHub notification settin
 **Solutions:**
 - Check spam folder
 - Verify `EMAIL_TO` is correct
-- Check Gmail App Password is valid
-- Ensure 2FA is enabled on Gmail account
-- Check workflow logs for error messages
+- Check Resend dashboard for delivery status and error codes
+- If using your own domain, verify DNS records and sender verification
 
 ### Rate Limiting
 
@@ -194,21 +193,9 @@ The workflow fetches posts using the **public Bluesky API**:
 
 ---
 
-## 📧 How to Get Gmail App Password
+## 📧 Email Provider
 
-1. **Enable 2-Factor Authentication** (if not already)
-   - Go to [myaccount.google.com/security](https://myaccount.google.com/security)
-   - Turn on "2-Step Verification"
-
-2. **Create App Password**
-   - Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-   - Select "Mail" and your device
-   - Click "Generate"
-   - Copy the 16-character password (e.g., `abcd efgh ijkl mnop`)
-
-3. **Add to GitHub Secrets**
-   - Use this password for `EMAIL_PASSWORD` secret
-   - **Not your regular Gmail password!**
+This project uses **Resend** for email delivery. For a 5-minute setup guide, see **[EASY_EMAIL_SETUP.md](EASY_EMAIL_SETUP.md)**.
 
 ---
 
@@ -232,10 +219,9 @@ The workflow fetches posts using the **public Bluesky API**:
 ## 🔐 Security Best Practices
 
 - ✅ Use **Private repository** for your code
-- ✅ Always use **App Passwords**, never main passwords
-- ✅ Store all credentials as **GitHub Secrets**
+- ✅ Use **Resend API keys** and store them as **GitHub Secrets**
 - ✅ Never commit `.env` file (it's in `.gitignore`)
-- ✅ Regularly rotate passwords and tokens
+- ✅ Rotate API keys periodically and restrict domains/senders where possible
 - ✅ Enable GitHub's **Dependabot** for security updates
 
 ---
@@ -303,10 +289,10 @@ Each with different schedules and scripts.
 
 Common issues:
 
-1. **Secrets not working** → Check spelling and case sensitivity (only email secrets needed)
+1. **Secrets not working** → Check spelling and case sensitivity (need 3 secrets: RESEND_API_KEY, EMAIL_FROM, EMAIL_TO)
 2. **Workflow not in Actions tab** → File must be in `.github/workflows/`
-3. **Schedule not running** → Enable schedule in `daily-post.yml` (uncomment the schedule section)
-4. **Gmail blocking** → Use App Password with 2FA enabled, not regular password
+3. **Schedule not running** → Ensure schedule is enabled in `daily-post.yml`
+4. **Delivery failing** → Check Resend dashboard logs and verify sender domain or use `onboarding@resend.dev`
 
 ---
 
