@@ -1,0 +1,62 @@
+name: Daily Bluesky Email
+
+on:
+  schedule:
+    # Runs every day at 22:00 UTC (7 PM Brazil / 1 hour after typical posting time)
+    # Based on analysis: Posts typically published around 21:00 UTC
+    - cron: '0 22 * * *'
+  
+  # Allows manual trigger from Actions tab
+  workflow_dispatch:
+
+jobs:
+  send-daily-email:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Restore last sent post tracking
+        uses: actions/cache/restore@v4
+        with:
+          path: last_sent_post.json
+          key: last-sent-post-${{ github.run_id }}
+          restore-keys: |
+            last-sent-post-
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run emailer script
+        env:
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        run: |
+          python bluesky_emailer.py
+      
+      - name: Save last sent post tracking
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: last_sent_post.json
+          key: last-sent-post-${{ github.run_id }}
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Daily email job failed!"
+          echo "Check the logs above for details."
