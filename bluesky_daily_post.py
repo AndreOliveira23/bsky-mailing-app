@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 import json
 import logging
@@ -417,7 +418,7 @@ def main():
     if not post:
         logger.error("✗ No posts found or error occurred while fetching post.")
         logger.info(f"Total execution time: {time.time() - start_time:.2f}s")
-        return
+        sys.exit(1)
     
     # Check for duplication
     #last_sent = load_last_sent()
@@ -443,6 +444,7 @@ def main():
         logger.info(f"✓ Saved post tracking to {LAST_SENT_FILE}")
     else:
         logger.error("✗ Email not sent, not saving tracking info")
+        sys.exit(1)
     
     total_time = time.time() - start_time
     logger.info("="*60)
