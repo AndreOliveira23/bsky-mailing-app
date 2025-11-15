@@ -93,7 +93,7 @@ def get_thread_posts(feed_item):
         root_text = root_record.get('text', '')
         
         # Check if root has the agenda text
-        if 'A agenda esportiva desta' in root_text:
+        if 'A agenda esportiva' in root_text:
             result['main_post'] = root_post
             result['subject_text'] = root_text
             
