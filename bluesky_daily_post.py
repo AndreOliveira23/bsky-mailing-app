@@ -110,7 +110,7 @@ def get_thread_posts(feed_item):
     else:
         # This is a main post (not a reply)
         text = record.get('text', '')
-        if 'A agenda esportiva desta' in text:
+        if 'A agenda esportiva' in text:
             result['main_post'] = post
             result['subject_text'] = text
     
